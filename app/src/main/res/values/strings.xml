@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">LazyElems</string>
+    <string name="title">Лекция от 31.10.2025г.</string>
+    <string name="main_content">Содержание активности</string>
+    <string name="add">Добавить</string>
+    <string name="back">Назад</string>
+    <string name="to_list">Посмотреть список</string>
+    <string name="list_content">Здесь будет список</string>
+</resources>

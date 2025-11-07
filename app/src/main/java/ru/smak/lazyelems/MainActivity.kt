@@ -20,8 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
@@ -101,7 +99,7 @@ class MainActivity : ComponentActivity() {
                                 viewModel.showDialog = true
                             }) {
                                 Icon(
-                                    Icons.Default.Add,
+                                    painterResource(R.drawable.baseline_add_24),
                                     contentDescription = stringResource(R.string.add)
                                 )
                             }

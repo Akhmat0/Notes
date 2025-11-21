@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.smak.lazyelems.db.Card
 import ru.smak.lazyelems.ui.theme.LazyElemsTheme
 import ru.smak.lazyelems.viewmodels.MainViewModel
 import ru.smak.lazyelems.viewmodels.Pages
@@ -107,27 +110,33 @@ class MainActivity : ComponentActivity() {
                     },
                     floatingActionButtonPosition = FabPosition.EndOverlay,
                 ) { innerPadding ->
-                    when (viewModel.page) {
-                        Pages.MAIN -> MainContent(
-                            modifier = Modifier
-                                .padding(innerPadding)
-                                .fillMaxSize()
-                        ){
-                            viewModel.toList()
+                    Crossfade(
+                        targetState = viewModel.page,
+                        animationSpec = tween(500),
+                    ) { page ->
+                        when (page) {
+                            Pages.MAIN -> MainContent(
+                                modifier = Modifier
+                                    .padding(innerPadding)
+                                    .fillMaxSize()
+                            ) {
+                                viewModel.toList()
+                            }
+
+                            Pages.LIST -> ListContent(
+                                viewModel.values,
+                                modifier = Modifier
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .padding(innerPadding)
+                                    .fillMaxSize()
+                            )
                         }
-                        Pages.LIST -> ListContent(
-                            viewModel.values,
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                                .padding(innerPadding)
-                                .fillMaxSize()
-                        )
                     }
                     if (viewModel.showDialog) {
                         TextDialog(
                             onDismiss = { viewModel.showDialog = false },
-                            onSave = {
-                                viewModel.addValue(it)
+                            onSave = { title, text ->
+                                viewModel.addValue(title, text)
                                 viewModel.showDialog = false
                             }
                         )
@@ -159,7 +168,7 @@ fun MainContent(
 
 @Composable
 fun ListContent(
-    list: List<Pair<Int, String>>,
+    list: List<Card>,
     modifier: Modifier = Modifier,
 ){
     Column(
@@ -188,12 +197,12 @@ fun ListContentPreview(){
     LazyElemsTheme {
         ListContent(
             listOf(
-                1 to "some text 1",
-                2 to "some text 2",
-                3 to "some text 3",
-                4 to "some text 4. It will be a long text",
-                5 to "some text 5",
-                6 to "some text 6",
+//                1 to "some text 1",
+//                2 to "some text 2",
+//                3 to "some text 3",
+//                4 to "some text 4. It will be a long text",
+//                5 to "some text 5",
+//                6 to "some text 6",
             ),
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer)
         )
@@ -202,14 +211,14 @@ fun ListContentPreview(){
 
 @Composable
 fun CardWithValue(
-    value: Pair<Int, String>,
+    value: Card,
     modifier: Modifier = Modifier,
 ){
     ElevatedCard(
         modifier = modifier
     ) {
         Text(
-            value.first.toString(),
+            value.title,
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
@@ -217,7 +226,7 @@ fun CardWithValue(
         )
         HorizontalDivider(modifier = Modifier.fillMaxWidth(), 1.dp)
         Text(
-            value.second,
+            value.text,
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             textAlign = TextAlign.Start,
             fontSize = 14.sp,
@@ -230,7 +239,7 @@ fun CardWithValue(
 @Composable
 fun CardWithValuePreview(){
     LazyElemsTheme {
-        CardWithValue(3 to "some text", modifier = Modifier.fillMaxWidth())
+        //CardWithValue(3 to "some text", modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -238,27 +247,35 @@ fun CardWithValuePreview(){
 fun TextDialog(
     modifier: Modifier = Modifier,
     onDismiss: ()->Unit = {},
-    onSave: (String)->Unit = {},
+    onSave: (String, String)->Unit = { _, _ -> },
 ){
+    var userTitle by remember { mutableStateOf("") }
     var userText by remember { mutableStateOf("") }
     AlertDialog(
+        modifier = modifier,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = {
-                onSave(userText)
+                onSave(userTitle, userText)
             }){
                 Text("Ок")
             }
         },
-        title = {
-            Text("Введите текст:")
-        },
         text = {
-            OutlinedTextField(value = userText,
-                onValueChange = {
-                    userText = it
-                }
-            )
+            Column {
+                OutlinedTextField(
+                    value = userTitle,
+                    onValueChange = {
+                        userTitle = it
+                    }
+                )
+                OutlinedTextField(
+                    value = userText,
+                    onValueChange = {
+                        userText = it
+                    }
+                )
+            }
         },
     )
 }

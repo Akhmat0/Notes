@@ -8,7 +8,20 @@ import androidx.room.PrimaryKey
 data class Card(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
+
+    // Заголовок может быть пустым
     @ColumnInfo(name = "title")
-    var title: String,
-    var text: String,
+    var title: String? = null,
+
+    // Текст может быть пустым
+    @ColumnInfo(name = "text")
+    var text: String? = null,
+
+    // Приоритет: 0 – высокий, 1 – нормальный, 2 – низкий
+    @ColumnInfo(name = "priority")
+    var priority: Int = 1,
+
+    // Время последнего редактирования (мс с эпохи)
+    @ColumnInfo(name = "last_modified")
+    var lastModified: Long = System.currentTimeMillis()
 )

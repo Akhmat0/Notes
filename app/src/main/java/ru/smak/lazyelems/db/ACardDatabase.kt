@@ -5,21 +5,27 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Card::class], version = 1, exportSchema = false)
-abstract class ACardDatabase : RoomDatabase(){
+@Database(
+    entities = [Card::class],
+    version = 2,          // было 1 → стало 2
+    exportSchema = false
+)
+abstract class ACardDatabase : RoomDatabase() {
     abstract fun cardsDao(): CardDao
 }
 
-object CardDatabase{
+object CardDatabase {
     private lateinit var db: CardDao
 
     fun getDb(context: Context): CardDao {
-        if (!::db.isInitialized){
+        if (!::db.isInitialized) {
             db = Room.databaseBuilder(
-                context,
+                context.applicationContext,
                 ACardDatabase::class.java,
                 "db_cards"
-            ).build()
+            )
+                .fallbackToDestructiveMigration() // для задания проще всего
+                .build()
                 .cardsDao()
         }
         return db

@@ -13,4 +13,9 @@
     <string name="priority_text">Приоритет:</string>
     <string name="cancel">Отмена</string>
     <string name="Title">Заголовок (≤ 30 символов)</string>
+    <string name="error">Ошибка</string>
+    <string name="title_required">Заголовок обязателен</string>
+    <string name="error_text_label">Текст (может быть пустым)</string>
+    <string name="ok">Ок</string>
+
 </resources>

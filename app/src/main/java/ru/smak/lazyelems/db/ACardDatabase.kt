@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Card::class],
-    version = 2,          // было 1 → стало 2
+    version = 2,
     exportSchema = false
 )
 abstract class ACardDatabase : RoomDatabase() {

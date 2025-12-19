@@ -31,17 +31,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun toList() {
-        page = Pages.LIST
-    }
 
-    fun back() {
-        page = Pages.MAIN
-    }
 
-    // Создание новой карточки
+
     fun addValue(title: String, text: String, priority: Int) {
-        // Можно пустой title ИЛИ пустой text, но не оба
+
         if (title.isBlank() && text.isBlank()) return
 
         val card = Card(
@@ -56,7 +50,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // Обновление существующей
+
     fun updateValue(card: Card, title: String, text: String, priority: Int) {
         if (title.isBlank() && text.isBlank()) return
 

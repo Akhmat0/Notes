@@ -243,21 +243,28 @@ fun CardWithValue(
 
 @Composable
 fun TextDialog(
-    card: Card? = null,
     modifier: Modifier = Modifier,
+    card: Card? = null,
     onDismiss: () -> Unit = {},
     onSave: (String, String, Int) -> Unit = { _, _, _ -> },
 ) {
     var userTitle by remember { mutableStateOf(card?.title ?: "") }
     var userText by remember { mutableStateOf(card?.text ?: "") }
     var priority by remember { mutableIntStateOf(card?.priority ?: 1) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
 
     AlertDialog(
         modifier = modifier,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = {
-                // ограничение заголовка 30 символами
+                // проверка: оба пустые
+                if (userTitle.isBlank() && userText.isBlank()) {
+                    errorMessage = "Введите заголовок или текст"
+                    return@Button
+                }
+
                 val limitedTitle = if (userTitle.length > 30) {
                     userTitle.take(30)
                 } else {
@@ -269,17 +276,16 @@ fun TextDialog(
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            Button(onClick = onDismiss) { Text("Отмена") }
         },
         text = {
             Column {
                 OutlinedTextField(
                     value = userTitle,
                     onValueChange = { new ->
-                        // не даём ввести больше 30 символов
                         userTitle = if (new.length <= 30) new else new.take(30)
                     },
-                    label = { Text(stringResource(R.string.Title)) },
+                    label = { Text("Заголовок (≤ 30 символов)") },
                     singleLine = true,
                     maxLines = 1
                 )
@@ -290,7 +296,7 @@ fun TextDialog(
                 )
 
                 Text(
-                    text = stringResource(R.string.priority_text),
+                    text = "Приоритет:",
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
@@ -300,14 +306,30 @@ fun TextDialog(
                         .padding(top = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    PriorityChip(stringResource(R.string.high), 0, priority) { priority = it }
-                    PriorityChip(stringResource(R.string.normal), 1, priority) { priority = it }
-                    PriorityChip(stringResource(R.string.low), 2, priority) { priority = it }
+                    PriorityChip("Высокий", 0, priority) { priority = it }
+                    PriorityChip("Нормальный", 1, priority) { priority = it }
+                    PriorityChip("Низкий", 2, priority) { priority = it }
                 }
             }
         },
     )
+
+
+    if (errorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { errorMessage = null },
+            confirmButton = {
+                Button(onClick = { errorMessage = null }) {
+                    Text("Ок")
+                }
+            },
+            text = {
+                Text(errorMessage ?: "")
+            }
+        )
+    }
 }
+
 
 @Composable
 private fun PriorityChip(

@@ -1,9 +1,16 @@
 <resources>
     <string name="app_name">LazyElems</string>
-    <string name="title">Лекция от 31.10.2025г.</string>
+    <string name="title">Заметки</string>
     <string name="main_content">Содержание активности</string>
     <string name="add">Добавить</string>
     <string name="back">Назад</string>
     <string name="to_list">Посмотреть список</string>
     <string name="list_content">Здесь будет список</string>
+    <string name="priority">Приоритет: %1$s</string>
+    <string name="high">высокий</string>
+    <string name="normal">нормальный</string>
+    <string name="low">низкий</string>
+    <string name="priority_text">Приоритет:</string>
+    <string name="cancel">Отмена</string>
+    <string name="Title">Заголовок (≤ 30 символов)</string>
 </resources>

@@ -1,23 +1,16 @@
 package ru.smak.lazyelems
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,19 +19,20 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -50,13 +44,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.smak.lazyelems.db.Card
 import ru.smak.lazyelems.ui.theme.LazyElemsTheme
 import ru.smak.lazyelems.viewmodels.MainViewModel
-import ru.smak.lazyelems.viewmodels.Pages
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -64,7 +57,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -78,65 +71,36 @@ class MainActivity : ComponentActivity() {
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                            ),
-                            navigationIcon = {
-                                if (viewModel.page != Pages.MAIN) {
-                                    IconButton(onClick = { viewModel.back() }) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.outline_arrow_back_24),
-                                            contentDescription = stringResource(R.string.back)
-                                        )
-                                    }
-                                }
-                            }
+                            )
                         )
                     },
                     floatingActionButton = {
-                        if (viewModel.page == Pages.LIST) {
-                            FloatingActionButton(onClick = {
-                                viewModel.editableCard = null
-                                viewModel.showDialog = true
-                            }) {
-                                Icon(
-                                    painterResource(R.drawable.baseline_add_24),
-                                    contentDescription = stringResource(R.string.add)
-                                )
-                            }
+                        FloatingActionButton(onClick = {
+                            viewModel.editableCard = null
+                            viewModel.showDialog = true
+                        }) {
+                            Icon(
+                                painterResource(R.drawable.baseline_add_24),
+                                contentDescription = stringResource(R.string.add)
+                            )
                         }
                     },
                     floatingActionButtonPosition = FabPosition.EndOverlay,
                 ) { innerPadding ->
-                    Crossfade(
-                        targetState = viewModel.page,
-                        animationSpec = tween(500),
-                    ) { page ->
-                        when (page) {
-                            Pages.MAIN -> MainContent(
-                                modifier = Modifier
-                                    .padding(innerPadding)
-                                    .fillMaxSize()
-                            ) {
-                                viewModel.toList()
-                            }
-
-                            Pages.LIST -> ListContent(
-                                list = viewModel.values,
-                                onLongClick = { card ->
-                                    // редактирование
-                                    viewModel.editableCard = card
-                                    viewModel.showDialog = true
-                                },
-                                onDelete = { card ->
-                                    viewModel.deleteValue(card)
-                                },
-                                modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                                    .padding(innerPadding)
-                                    .fillMaxSize()
-                            )
-                        }
-                    }
+                    ListContent(
+                        list = viewModel.values,
+                        onLongClick = { card ->
+                            viewModel.editableCard = card
+                            viewModel.showDialog = true
+                        },
+                        onDelete = { card ->
+                            viewModel.deleteValue(card)
+                        },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                    )
 
                     if (viewModel.showDialog) {
                         TextDialog(
@@ -159,23 +123,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun MainContent(
-    modifier: Modifier = Modifier,
-    onPageChange: () -> Unit = {},
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(stringResource(R.string.main_content))
-        Button(onClick = onPageChange) {
-            Text(stringResource(R.string.to_list))
-        }
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListContent(
@@ -194,7 +141,7 @@ fun ListContent(
         } else {
             LazyVerticalStaggeredGrid(
                 modifier = Modifier.fillMaxSize(),
-                columns = StaggeredGridCells.Adaptive(128.dp),
+                columns = StaggeredGridCells.Fixed(1),
             ) {
                 items(list) { item ->
                     CardWithValue(
@@ -203,8 +150,8 @@ fun ListContent(
                             .fillMaxWidth()
                             .padding(8.dp)
                             .combinedClickable(
-                                onClick = { onDelete(item) },       // короткое нажатие — удалить
-                                onLongClick = { onLongClick(item) } // долгое — редактировать
+                                onClick = { onDelete(item) },
+                                onLongClick = { onLongClick(item) }
                             )
                     )
                 }
@@ -212,6 +159,7 @@ fun ListContent(
         }
     }
 }
+
 @Composable
 fun CardWithValue(
     value: Card,
@@ -225,16 +173,22 @@ fun CardWithValue(
     ElevatedCard(
         modifier = modifier
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
 
             // Заголовок, если есть
             value.title?.takeIf { it.isNotBlank() }?.let { title ->
                 Text(
-                    title,
+                    text = title,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis      // на всякий случай, если переполнит
                 )
             }
 
@@ -248,29 +202,41 @@ fun CardWithValue(
                 )
             }
 
-            // Текст, если есть
+            // Текст, если есть — максимум 3 строки, с троеточием
             value.text?.takeIf { it.isNotBlank() }?.let { text ->
                 Text(
-                    text,
+                    text = text,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Start,
                     fontSize = 14.sp,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
-            // Дата и приоритет мелким шрифтом
-            Text(
-                text = "Изм.: $dateText | Приоритет: ${when (value.priority) {
-                    0 -> "высокий"
-                    1 -> "нормальный"
-                    else -> "низкий"
-                }}",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                fontSize = 12.sp,
-                textAlign = TextAlign.End
-            )
+            // Дата и приоритет
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = dateText,
+                    modifier = Modifier.padding(top = 8.dp),
+                    fontSize = 12.sp,
+                )
+                Text(
+                    text = stringResource(
+                        R.string.priority,
+                        when (value.priority) {
+                            0 -> stringResource(R.string.high)
+                            1 -> stringResource(R.string.normal)
+                            else -> stringResource(R.string.low)
+                        }
+                    ),
+                    modifier = Modifier.padding(top = 8.dp),
+                    fontSize = 12.sp,
+                )
+            }
         }
     }
 }
@@ -291,20 +257,31 @@ fun TextDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = {
-                onSave(userTitle, userText, priority)
+                // ограничение заголовка 30 символами
+                val limitedTitle = if (userTitle.length > 30) {
+                    userTitle.take(30)
+                } else {
+                    userTitle
+                }
+                onSave(limitedTitle, userText, priority)
             }) {
                 Text("Ок")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) { Text("Отмена") }
+            Button(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
         text = {
             Column {
                 OutlinedTextField(
                     value = userTitle,
-                    onValueChange = { userTitle = it },
-                    label = { Text("Заголовок (может быть пустым)") }
+                    onValueChange = { new ->
+                        // не даём ввести больше 30 символов
+                        userTitle = if (new.length <= 30) new else new.take(30)
+                    },
+                    label = { Text(stringResource(R.string.Title)) },
+                    singleLine = true,
+                    maxLines = 1
                 )
                 OutlinedTextField(
                     value = userText,
@@ -313,7 +290,7 @@ fun TextDialog(
                 )
 
                 Text(
-                    text = "Приоритет:",
+                    text = stringResource(R.string.priority_text),
                     modifier = Modifier.padding(top = 8.dp)
                 )
 
@@ -323,12 +300,10 @@ fun TextDialog(
                         .padding(top = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    PriorityChip("Высокий", 0, priority) { priority = it }
-                    PriorityChip("Нормальный", 1, priority) { priority = it }
-                    PriorityChip("Низкий", 2, priority) { priority = it }
+                    PriorityChip(stringResource(R.string.high), 0, priority) { priority = it }
+                    PriorityChip(stringResource(R.string.normal), 1, priority) { priority = it }
+                    PriorityChip(stringResource(R.string.low), 2, priority) { priority = it }
                 }
-
-
             }
         },
     )
@@ -341,12 +316,22 @@ private fun PriorityChip(
     selected: Int,
     onSelect: (Int) -> Unit
 ) {
+    val isSelected = selected == value
+
     Button(
         onClick = { onSelect(value) },
-        enabled = selected != value,
-        modifier = Modifier.padding(end = 4.dp)   // без fillMaxWidth
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.surface,
+            contentColor = if (isSelected)
+                MaterialTheme.colorScheme.onPrimary
+            else
+                MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Text(label, fontSize = 14.sp)
     }
 }
-
